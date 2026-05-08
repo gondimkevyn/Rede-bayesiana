@@ -40,7 +40,7 @@ Os cálculos realizados pelo motor de inferência demonstram a aplicação da **
 ### 📂 Como Executar
 
 1. Acesse o [ProbLog Editor Online](https://dtai.cs.kuleuven.be/problog/editor.html).
-2. Cole o código do arquivo `.pl` presente neste repositório.
+2. Cole o código presente neste repositório.
 3. Clique em **Evaluate** para observar as inferências marginais e conjuntas.
 
 ---
