@@ -1,0 +1,53 @@
+% Exercício 13.BATF - Rede Bayesiana 
+% Kevyn do Nascimento Paz Gondim
+
+% --- FATOS PROBABILÍSTICOS (Nós Raiz) ---
+0.9::b.   % Broke Law (Quebrou a lei)
+0.1::m.   % Politically Motivated (Motivação Política)
+0.01::p.  % Presidential Pardon (Indulto Presidencial)
+
+% --- REGRAS PROBABILÍSTICAS (Nós com pais) ---
+
+% P(I | B, M) - Indiciado (Indicted)
+0.9::i :- b, m.
+0.5::i :- b, \+ m.
+0.5::i :- \+ b, m.
+0.1::i :- \+ b, \+ m.
+
+% P(G | B, I, M) - Culpado (Guilty)
+0.9::g :- b, i, m.
+0.8::g :- b, i, \+ m.
+0.1::g :- b, \+ i, m.
+0.2::g :- b, \+ i, \+ m.
+0.0::g :- \+ b, i, m.
+0.2::g :- \+ b, i, \+ m.
+0.8::g :- \+ b, \+ i, m.
+0.0::g :- \+ b, \+ i, \+ m.
+
+% P(J | G, P) - Cadeia (Jail) 
+% A probabilidade de ir preso (j) agora depende de ser culpado (g) E de NÃO ter recebido indulto (\+ p)
+0.9::j :- g, \+ p.        % Culpado e SEM indulto (90% de chance)
+0.05::j :- g, p.          % Culpado, mas COM indulto (chance cai para 5%)
+0.0::j :- \+ g.           % Se não for culpado, 0% de chance
+
+% --- QUERIES ORIGINAIS + ADIÇÃO DE PERDÃO ---
+
+% Item B: P(b, i, m, ~g, j)
+query(cenario_b).
+cenario_b :- b, i, m, \+ g, j.
+
+% Item C: P(b, i, ~m, g, j) e a chance de perdão neste cenário
+query(cenario_c).
+cenario_c :- b, i, \+ m, g, j.
+query(cenario_c_com_perdao).
+cenario_c_com_perdao :- b, i, \+ m, g, p. % Culpado no cenário C, mas recebe indulto
+
+% Item D: P(j, b, i, m) e a chance de perdão neste cenário
+query(cenario_d).
+cenario_d :- j, b, i, m.
+query(cenario_d_com_perdao).
+cenario_d_com_perdao :- b, i, m, g, p.    % Culpado no cenário D, mas recebe indulto
+
+% Evidência para cálculo condicional
+query(prob_evidencia_d).
+prob_evidencia_d :- b, i, m.
