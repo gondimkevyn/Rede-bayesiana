@@ -1,0 +1,78 @@
+
+% Exercício 13.BATF - Rede Bayesiana 
+
+% Kevyn do Nascimento Paz Gondim
+
+% --- ANÁLISE DA ESTRUTURA (Item A) ---
+% (i) P(B, I, M) = P(B)P(I)P(M): Falsa. I (Indiciado) tem setas vindo de B e M, 
+%     o que significa que I depende deles. Forma correta: P(B)P(M)P(I|B,M).
+
+% (ii) P(J|G) = P(J|G, I): Verdadeira. Em uma rede bayesiana, um nó é independente 
+%      de seus ancestrais dado seu pai direto. Como G está entre I e J, 
+%      a informação de I é irrelevante para J.
+
+% (iii) P(M|G, B, I) = P(M|G, B, I, J): Verdadeira. M é independente de seu 
+%       descendente J quando o estado de seus outros descendentes e ancestrais 
+%       já é conhecido no contexto da estrutura.
+
+% --- FATOS PROBABILÍSTICOS (Nós sem pais) ---
+0.9::b. % Broke Law (Quebrou a lei) 
+0.1::m. % Politically Motivated (Motivação Política) 
+
+% --- REGRAS PROBABILÍSTICAS (Nós com pais) ---
+
+% P(I | B, M) - Indiciado (Indicted)
+0.9::i :- b, m.           % Ambos verdadeiros (TT) 
+0.5::i :- b, \+ m.        % Quebrou lei, mas não motivado (TF) 
+0.5::i :- \+ b, m.        % Não quebrou lei, mas motivado (FT) 
+0.1::i :- \+ b, \+ m.     % Nenhum (FF) 
+
+% P(G | B, I, M) - Culpado (Guilty)
+0.9::g :- b, i, m.        % TTT 
+0.8::g :- b, i, \+ m.     % TTF 
+0.1::g :- b, \+ i, m.     % TFT 
+0.2::g :- b, \+ i, \+ m.  % TFF 
+0.0::g :- \+ b, i, m.     % FTT 
+0.2::g :- \+ b, i, \+ m.  % FTF 
+0.8::g :- \+ b, \+ i, m.  % FFT 
+0.0::g :- \+ b, \+ i, \+ m.% FFF 
+
+% P(J | G) - Cadeia (Jail)
+0.9::j :- g.              % Se culpado, 90% de chance de cadeia 
+0.0::j :- \+ g.           % Se não culpado, 0% de chance 
+
+% --- REGRAS DE CENÁRIO ---
+
+% Item B: P(b, i, m, ~g, j) 
+cenario_b :- b, i, m, \+ g, j.
+
+% Item C: P(b, i, ~m, g, j) 
+cenario_c :- b, i, \+ m, g, j.
+
+% Item D: Probabilidade de ir para a cadeia (j) dadas as evidências b, i e m.
+% O ProbLog calculará isso como P(j, b, i, m) / P(b, i, m).
+cenario_d :- j, b, i, m.
+prob_evidencia_d :- b, i, m.
+
+% --- QUERIES ---
+
+query(cenario_b).
+query(cenario_c).
+
+% Divida o valor de 'cenario_d' pelo valor de 'prob_evidencia_d' (0.06561 / 0.081 = 0.81)
+query(cenario_d).
+query(prob_evidencia_d).
+
+% --- RESPOSTA ITEM E: Independência Específica ao Contexto ---
+% A Independência de Contexto Específico ocorre no nó G (Culpado) 
+% Embora o grafo mostre que G possui três pais (B, I, M), a influência 
+% de M (Motivação Política) desaparece em contextos específicos.
+% Observa-se que quando o indivíduo NÃO 
+% quebrou a lei (\+ b) e NÃO foi indiciado (\+ i), a probabilidade de 
+% culpa é fixada em 0.0, independentemente de o promotor ser ou não 
+% politicamente motivado (m). 
+% Isso demonstra uma simplificação lógica onde a estrutura de dependência 
+% é "quebrada" por valores específicos das variáveis de controle.
+
+
+
